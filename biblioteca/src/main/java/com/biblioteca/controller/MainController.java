@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = {"/index", "/login", "/register", "/livros", "/usuarios", "/salvarLivro", "/editarLivro", "/removerLivro"})
+@WebServlet(urlPatterns = {"/index", "/login", "/adminHome", "/register", "/livros", "/usuarios", "/salvarLivro", "/editarLivro", "/removerLivro"})
 public class MainController extends HttpServlet {
     private LivroService livroService;
     private UsuarioService usuarioService;
@@ -35,6 +35,9 @@ public class MainController extends HttpServlet {
             case "/login":
                 request.getRequestDispatcher("/common/login.jsp").forward(request, response);
                 break;
+            case "/adminHome":
+                request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
+                break;
             case "/livros":
                 listarLivros(request, response);
                 break;
@@ -48,7 +51,7 @@ public class MainController extends HttpServlet {
                 removerLivro(request, response);
                 break;
             default:
-                request.getRequestDispatcher("/common/index.jsp").forward(request, response);
+                request.getRequestDispatcher("/common/home.jsp").forward(request, response);
                 break;
         }
     }
@@ -61,6 +64,9 @@ public class MainController extends HttpServlet {
             case "/register":
                 registrarUsuario(request, response);
                 break;
+            case "/login":
+                request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
+                break;
             case "/salvarLivro":
                 salvarLivro(request, response);
                 break;
@@ -68,7 +74,7 @@ public class MainController extends HttpServlet {
                 editarLivro(request, response);
                 break;
             default:
-                request.getRequestDispatcher("/common/index.jsp").forward(request, response);
+                request.getRequestDispatcher("/common/home.jsp").forward(request, response);
                 break;
         }
     }
@@ -135,7 +141,7 @@ public class MainController extends HttpServlet {
         Usuario usuario = authService.authenticate(email, senha);
         if (usuario != null) {
             request.getSession().setAttribute("usuario", usuario);
-            request.getRequestDispatcher("/common/home.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
         } else {
             request.setAttribute("errorMessage", "Invalid email or password");
             request.getRequestDispatcher("/common/login.jsp").forward(request, response);

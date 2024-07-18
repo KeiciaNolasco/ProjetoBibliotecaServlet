@@ -3,25 +3,22 @@ package com.biblioteca.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 import java.util.Objects;
 
 @Entity
-@Table(name = "livros")
 public class Livro {
 
     @Id
-    @Column(unique=true, name="ISBN", nullable=false)
+    @Column(unique=true, nullable=false)
     private String isbn;
 
-    @Column(name="Título", nullable=false, length=50)
+    @Column(nullable=false, length=50)
     private String titulo;
 
-    @Column(name="Categoria")
     private String categoria;
 
-    @Column(name="Quantidade", nullable=false)
+    @Column(nullable=false)
     private Integer quantidade;
 
 
