@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public abstract class GenericDAO<T, ID extends Serializable> {
+
     private Class<T> entityClass;
     private SessionFactory sessionFactory;
 
@@ -66,4 +67,5 @@ public abstract class GenericDAO<T, ID extends Serializable> {
             delete(entity);
         }
     }
+
 }

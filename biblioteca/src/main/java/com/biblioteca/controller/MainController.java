@@ -1,30 +1,35 @@
 package com.biblioteca.controller;
 
 import java.io.IOException;
-import com.biblioteca.dao.LivroDAO;
-import com.biblioteca.dao.UsuarioDAO;
-import com.biblioteca.model.Livro;
-import com.biblioteca.model.Usuario;
+import com.biblioteca.dao.BookDAO;
+import com.biblioteca.dao.UserDAO;
+import com.biblioteca.model.Book;
+import com.biblioteca.model.User;
 import com.biblioteca.service.AuthenticationService;
-import com.biblioteca.service.LivroService;
-import com.biblioteca.service.UsuarioService;
+import com.biblioteca.service.BookService;
+import com.biblioteca.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = {"/index", "/login", "/adminHome", "/register", "/livros", "/usuarios", "/salvarLivro", "/editarLivro", "/removerLivro"})
+@WebServlet(urlPatterns = {
+        "/about", "/footer", "/home", "/listBooks", "/login", "/navbar", "/register",
+        "/adminAbout", "/adminAddBook", "/adminEditBook", "/adminFooter", "/adminHome", "/adminListBooks", "/AdminLogout", "/adminNavbar", "/adminRemoveBook"
+})
+
 public class MainController extends HttpServlet {
-    private LivroService livroService;
-    private UsuarioService usuarioService;
+
+    private BookService bookService;
+    private UserService userService;
     private AuthenticationService authService;
 
     @Override
     public void init() throws ServletException {
-        livroService = new LivroService(new LivroDAO());
-        usuarioService = new UsuarioService(new UsuarioDAO());
-        authService = new AuthenticationService(new UsuarioDAO());
+        bookService = new BookService(new BookDAO());
+        userService = new UserService(new UserDAO());
+        authService = new AuthenticationService(new UserDAO());
     }
 
     @Override
@@ -38,16 +43,16 @@ public class MainController extends HttpServlet {
             case "/adminHome":
                 request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
                 break;
-            case "/livros":
+            case "/books":
                 listarLivros(request, response);
                 break;
-            case "/usuarios":
+            case "/users":
                 listarUsuarios(request, response);
                 break;
-            case "/editarLivro":
+            case "/editBook":
                 editarLivroForm(request, response);
                 break;
-            case "/removerLivro":
+            case "/removeBook":
                 removerLivro(request, response);
                 break;
             default:
@@ -67,10 +72,10 @@ public class MainController extends HttpServlet {
             case "/login":
                 request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
                 break;
-            case "/salvarLivro":
+            case "/addBook":
                 salvarLivro(request, response);
                 break;
-            case "/editarLivro":
+            case "/editBook":
                 editarLivro(request, response);
                 break;
             default:
@@ -80,67 +85,67 @@ public class MainController extends HttpServlet {
     }
 
     private void listarLivros(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("listaLivros", livroService.getAllLivros());
-        request.getRequestDispatcher("/common/listBooks.jsp").forward(request, response);
+        request.setAttribute("listBooks", bookService.findAll());
+        request.getRequestDispatcher("/common/adminListBooks.jsp").forward(request, response);
     }
 
     private void listarUsuarios(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("listaUsuarios", usuarioService.getAllUsuarios());
+        request.setAttribute("listUsers", userService.findAll());
         request.getRequestDispatcher("/admin/users.jsp").forward(request, response);
     }
 
     private void salvarLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        String titulo = request.getParameter("titulo");
-        String categoria = request.getParameter("categoria");
-        int quantidade = Integer.parseInt(request.getParameter("quantidade"));
+        String titulo = request.getParameter("title");
+        String categoria = request.getParameter("category");
+        int quantidade = Integer.parseInt(request.getParameter("quantity"));
 
-        Livro livro = new Livro(isbn, titulo, categoria, quantidade);
-        livroService.saveLivro(livro);
-        response.sendRedirect("livros");
+        Book book = new Book(isbn, titulo, categoria, quantidade);
+        bookService.save(book);
+        response.sendRedirect("books");
     }
 
     private void editarLivroForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        Livro livro = livroService.getLivroById(isbn);
-        request.setAttribute("livro", livro);
-        request.getRequestDispatcher("/common/editBook.jsp").forward(request, response);
+        Book book = bookService.findById(isbn);
+        request.setAttribute("book", book);
+        request.getRequestDispatcher("/common/adminEditBook.jsp").forward(request, response);
     }
 
     private void editarLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        String titulo = request.getParameter("titulo");
-        String categoria = request.getParameter("categoria");
-        int quantidade = Integer.parseInt(request.getParameter("quantidade"));
+        String titulo = request.getParameter("title");
+        String categoria = request.getParameter("category");
+        int quantidade = Integer.parseInt(request.getParameter("quantity"));
 
-        Livro livro = new Livro(isbn, titulo, categoria, quantidade);
-        livroService.updateLivro(livro);
-        response.sendRedirect("livros");
+        Book book = new Book(isbn, titulo, categoria, quantidade);
+        bookService.update(book);
+        response.sendRedirect("books");
     }
 
     private void removerLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        livroService.deleteLivro(isbn);
-        response.sendRedirect("livros");
+        bookService.delete(isbn);
+        response.sendRedirect("books");
     }
 
     private void registrarUsuario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String nome = request.getParameter("nome");
+        String nome = request.getParameter("name");
         String email = request.getParameter("email");
-        String senha = request.getParameter("senha");
+        String senha = request.getParameter("password");
 
-        Usuario usuario = new Usuario(nome, email, senha);
-        authService.registerUser(usuario);
-        response.sendRedirect("usuarios");
+        User user = new User(nome, email, senha);
+        authService.registerUser(user);
+        response.sendRedirect("users");
     }
 
     private void logarUsuario(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
-        String senha = request.getParameter("senha");
+        String senha = request.getParameter("password");
 
-        Usuario usuario = authService.authenticate(email, senha);
-        if (usuario != null) {
-            request.getSession().setAttribute("usuario", usuario);
+        User user = authService.authenticate(email, senha);
+        if (user != null) {
+            request.getSession().setAttribute("user", user);
             request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
         } else {
             request.setAttribute("errorMessage", "Invalid email or password");

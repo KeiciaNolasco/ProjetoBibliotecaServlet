@@ -1,34 +1,34 @@
 package com.biblioteca.service;
 
-import com.biblioteca.dao.UsuarioDAO;
-import com.biblioteca.model.Usuario;
+import com.biblioteca.dao.UserDAO;
+import com.biblioteca.model.User;
 
 import java.util.List;
 
 public class AuthenticationService {
 
-    private UsuarioDAO usuarioDAO;
+    private UserDAO userDAO;
 
-    public AuthenticationService(UsuarioDAO usuarioDAO) {
-        this.usuarioDAO = usuarioDAO;
+    public AuthenticationService(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
 
-    public Usuario authenticate(String email, String senha) {
-        List<Usuario> users = usuarioDAO.findAll();
-        for (Usuario user : users) {
-            if (user.getEmail().equals(email) && user.getSenha().equals(senha)) {
+    public User authenticate(String email, String password) {
+        List<User> users = userDAO.findAll();
+        for (User user : users) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
                 return user;
             }
         }
         return null;
     }
 
-    public void registerUser(Usuario usuario) {
-        usuarioDAO.save(usuario);
+    public void registerUser(User user) {
+        userDAO.save(user);
     }
 
-    public List<Usuario> getAllUsers() {
-        return usuarioDAO.findAll();
+    public List<User> findAll() {
+        return userDAO.findAll();
     }
 
 }

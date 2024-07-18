@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,11 +9,12 @@
 </head>
 <body>
 <jsp:include page="/admin/adminNavbar.jsp"/>
-<div class="adminHome-container">
-    <div class="adminHome-form">
-    <h2>Welcome to the Admin Home Page</h2>
-        <form action="${pageContext.request.contextPath}/adminHome" method="get">
+<div class="banner-container">
+    <img src="${pageContext.request.contextPath}/resources/images/background%20banner.png" alt="Library Banner" class="banner-img">
+    <div class="banner-text">
+        DIGITAL LIBRARY ADMINISTRATOR
+    </div>
 </div>
-<jsp:include page="adminFooter.jsp"/>
+<jsp:include page="/admin/adminFooter.jsp"/>
 </body>
 </html>

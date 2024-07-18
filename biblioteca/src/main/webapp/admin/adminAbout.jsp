@@ -4,17 +4,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home</title>
+    <title>About</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/style.css">
 </head>
 <body>
-<jsp:include page="/common/navbar.jsp"/>
-<div class="banner-container">
-    <img src="${pageContext.request.contextPath}/resources/images/banner.png" alt="Library Banner" class="banner-img">
-    <div class="banner-text">
-        DIGITAL LIBRARY
+<jsp:include page="/admin/adminNavbar.jsp"/>
+<div class="about-container">
+    <div class="about-content">
+        <h2>About the Library</h2>
+        <p>Welcome to the Digital Library website. Here you can find and manage your favorite books.</p>
     </div>
 </div>
-<jsp:include page="/common/footer.jsp"/>
+<jsp:include page="/admin/adminFooter.jsp"/>
 </body>
 </html>
