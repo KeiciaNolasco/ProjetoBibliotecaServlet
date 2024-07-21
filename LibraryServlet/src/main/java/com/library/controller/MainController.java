@@ -1,15 +1,12 @@
 package com.library.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.library.dao.BookDAO;
 import com.library.dao.UserDAO;
 import com.library.model.Book;
 import com.library.model.User;
 import com.library.service.AuthenticationService;
-import com.library.service.BookService;
-import com.library.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,20 +14,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = {
-        "/about", "/footer", "/home", "/listBooks", "/login", "/navbar", "/register",
+        "/about", "/footer", "/home", "/listBooks", "/login", "/navbar", "/register", "/logout",
         "/adminAbout", "/adminAddBook", "/adminEditBook", "/adminFooter", "/adminHome", "/adminListBooks", "/AdminLogout", "/adminNavbar", "/adminRemoveBook"
 })
 
 public class MainController extends HttpServlet {
 
-    private BookService bookService;
-    private UserService userService;
+    private static final long serialVersionUID = 1L;
+
+    private BookDAO bookDAO;
+    private UserDAO userDAO;
     private AuthenticationService authService;
 
     @Override
     public void init() throws ServletException {
-        bookService = new BookService(new BookDAO());
-        userService = new UserService(new UserDAO());
+        bookDAO = new BookDAO();
+        userDAO = new UserDAO();
         authService = new AuthenticationService(new UserDAO());
     }
 
@@ -42,6 +41,9 @@ public class MainController extends HttpServlet {
             case "/login":
                 request.getRequestDispatcher("/common/login.jsp").forward(request, response);
                 break;
+            case "/logout":
+                logoutUser(request, response);
+                break;
             case "/adminHome":
                 request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
                 break;
@@ -49,19 +51,19 @@ public class MainController extends HttpServlet {
                 request.getRequestDispatcher("/common/register.jsp").forward(request, response);
                 break;
             case "/listBooks":
-                listBooks(request, response, "/common/listBooks.jsp");
+                request.getRequestDispatcher("/common/listBooks.jsp").forward(request, response);
                 break;
             case "/adminListBooks":
-                listBooks(request, response, "/admin/adminListBooks.jsp");
+                request.getRequestDispatcher("/admin/adminListBooks.jsp").forward(request, response);
                 break;
-            case "/users":
-                listarUsuarios(request, response);
+            case "/adminAddBooks":
+                request.getRequestDispatcher("/admin/adminAddBook.jsp").forward(request, response);
                 break;
-            case "/editBook":
-                editarLivroForm(request, response);
+            case "/adminEditBook":
+                showEditBookForm(request, response);
                 break;
-            case "/removeBook":
-                removerLivro(request, response);
+            case "/adminRemoveBook":
+                showRemoveBookForm(request, response);
                 break;
             default:
                 request.getRequestDispatcher("/common/home.jsp").forward(request, response);
@@ -81,13 +83,19 @@ public class MainController extends HttpServlet {
                 loginUser(request, response);
                 break;
             case "/listBooks":
-                listBooks(request, response, "/common/listBooks.jsp");
+                listBooks(request, response);
                 break;
-            case "/addBook":
-                salvarLivro(request, response);
+            case "/adminListBooks":
+                adminListBooks(request, response);
                 break;
-            case "/editBook":
-                editarLivro(request, response);
+            case "/adminAddBook":
+                addBook(request, response);
+                break;
+            case "/adminEditBook":
+                editBook(request, response);
+                break;
+            case "/adminRemoveBook":
+                removeBook(request, response);
                 break;
             default:
                 request.getRequestDispatcher("/common/home.jsp").forward(request, response);
@@ -95,52 +103,82 @@ public class MainController extends HttpServlet {
         }
     }
 
-    private void listBooks(HttpServletRequest request, HttpServletResponse response, String jspPath) throws ServletException, IOException {
-        List<Book> books = bookService.findAll();
-        request.setAttribute("listBooks", books);
-        request.getRequestDispatcher(jspPath).forward(request, response);
+    private void listBooks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/common/listBooks.jsp").forward(request, response);
     }
 
-    private void listarUsuarios(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("listUsers", userService.findAll());
-        request.getRequestDispatcher("/admin/users.jsp").forward(request, response);
+    private void adminListBooks(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/admin/adminListBooks.jsp").forward(request, response);
     }
 
-    private void salvarLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void addBook(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        String titulo = request.getParameter("title");
-        String categoria = request.getParameter("category");
-        Integer quantidade = Integer.parseInt(request.getParameter("quantity"));
+        String title = request.getParameter("title");
+        String category = request.getParameter("category");
+        Integer quantity = Integer.parseInt(request.getParameter("quantity"));
         String image = request.getParameter("image");
 
-        Book book = new Book(isbn, titulo, categoria, quantidade, image);
-        bookService.save(book);
-        response.sendRedirect("books");
+        Book existingBook = bookDAO.findById(isbn);
+        if (existingBook == null) {
+            Book book = new Book(isbn, title, category, quantity, image);
+            bookDAO.save(book);
+            response.sendRedirect("/admin/adminListBooks.jsp");
+        } else {
+            request.setAttribute("errorMessage", "A book with this ISBN already exists.");
+            request.getRequestDispatcher("/admin/adminAddBook.jsp").forward(request, response);
+        }
+
     }
 
-    private void editarLivroForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showEditBookForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        Book book = bookService.findById(isbn);
-        request.setAttribute("book", book);
-        request.getRequestDispatcher("/common/adminEditBook.jsp").forward(request, response);
-    }
-
-    private void editarLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String isbn = request.getParameter("isbn");
-        String titulo = request.getParameter("title");
-        String categoria = request.getParameter("category");
-        Integer quantidade = Integer.parseInt(request.getParameter("quantity"));
+        String title = request.getParameter("title");
+        String category = request.getParameter("category");
+        Integer quantity = Integer.parseInt(request.getParameter("quantity"));
         String image = request.getParameter("image");
 
-        Book book = new Book(isbn, titulo, categoria, quantidade, image);
-        bookService.update(book);
-        response.sendRedirect("books");
+        request.setAttribute("isbn", isbn);
+        request.setAttribute("title", title);
+        request.setAttribute("category", category);
+        request.setAttribute("quantity", quantity);
+        request.setAttribute("image", image);
+
+        request.getRequestDispatcher("/admin/adminEditBook.jsp").forward(request, response);
     }
 
-    private void removerLivro(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    private void editBook(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String isbn = request.getParameter("isbn");
-        bookService.delete(isbn);
-        response.sendRedirect("books");
+        String title = request.getParameter("title");
+        String category = request.getParameter("category");
+        Integer quantity = Integer.parseInt(request.getParameter("quantity"));
+        String image = request.getParameter("image");
+
+        Book book = new Book(isbn, title, category, quantity, image);
+        bookDAO.update(book);
+        response.sendRedirect(request.getContextPath() + "/admin/adminListBooks.jsp");
+    }
+
+    private void showRemoveBookForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String isbn = request.getParameter("isbn");
+        String title = request.getParameter("title");
+        String category = request.getParameter("category");
+        Integer quantity = Integer.parseInt(request.getParameter("quantity"));
+        String image = request.getParameter("image");
+
+        request.setAttribute("isbn", isbn);
+        request.setAttribute("title", title);
+        request.setAttribute("category", category);
+        request.setAttribute("quantity", quantity);
+        request.setAttribute("image", image);
+
+        request.getRequestDispatcher("/admin/adminRemoveBook.jsp").forward(request, response);
+    }
+
+    private void removeBook(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String isbn = request.getParameter("isbn");
+        bookDAO.deleteById(isbn);
+        response.sendRedirect(request.getContextPath() + "/admin/adminListBooks.jsp");
     }
 
     private void registerUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -165,5 +203,10 @@ public class MainController extends HttpServlet {
             request.setAttribute("errorMessage", "Invalid email or password");
             request.getRequestDispatcher("/common/login.jsp").forward(request, response);
         }
+    }
+
+    private void logoutUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getSession().invalidate();
+        response.sendRedirect(request.getContextPath() + "/common/home.jsp");
     }
 }
