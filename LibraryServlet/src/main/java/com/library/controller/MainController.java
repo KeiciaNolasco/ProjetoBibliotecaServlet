@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = {
         "/about", "/footer", "/home", "/listBooks", "/login", "/navbar", "/register", "/logout",
-        "/adminAbout", "/adminAddBook", "/adminEditBook", "/adminFooter", "/adminHome", "/adminListBooks", "/AdminLogout", "/adminNavbar", "/adminRemoveBook"
+        "/adminAbout", "/adminEditUser", "/adminRemoveUser", "/adminAddBook", "/adminEditBook", "/adminFooter", "/adminHome", "/adminListBooks", "/AdminLogout", "/adminNavbar", "/adminRemoveBook"
 })
 
 public class MainController extends HttpServlet {
@@ -41,8 +41,14 @@ public class MainController extends HttpServlet {
             case "/login":
                 request.getRequestDispatcher("/common/login.jsp").forward(request, response);
                 break;
+            case "/adminEditUser":
+                showEditUserForm(request, response);
+                break;
             case "/logout":
                 logoutUser(request, response);
+                break;
+            case "/adminRemoveUser":
+                showRemoveUserForm(request, response);
                 break;
             case "/adminHome":
                 request.getRequestDispatcher("/admin/adminHome.jsp").forward(request, response);
@@ -81,6 +87,12 @@ public class MainController extends HttpServlet {
                 break;
             case "/login":
                 loginUser(request, response);
+                break;
+            case "/adminEditUser":
+                editUser(request, response);
+                break;
+            case "/adminRemoveUser":
+                removeUser(request, response);
                 break;
             case "/listBooks":
                 listBooks(request, response);
@@ -179,6 +191,52 @@ public class MainController extends HttpServlet {
         String isbn = request.getParameter("isbn");
         bookDAO.deleteById(isbn);
         response.sendRedirect(request.getContextPath() + "/admin/adminListBooks.jsp");
+    }
+
+    private void showEditUserForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        request.setAttribute("id" , id);
+        request.setAttribute("name", name);
+        request.setAttribute("email", email);
+        request.setAttribute("password", password);
+
+        request.getRequestDispatcher("/admin/adminEditUser.jsp").forward(request, response);
+    }
+
+    private void editUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        User user = new User(id, name, email, password);
+        userDAO.update(user);
+        request.getSession().setAttribute("user", user);
+        response.sendRedirect(request.getContextPath() + "/admin/adminHome.jsp");
+    }
+
+    private void showRemoveUserForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        request.setAttribute("id" , id);
+        request.setAttribute("name", name);
+        request.setAttribute("email", email);
+        request.setAttribute("password", password);
+
+        request.getRequestDispatcher("/admin/adminRemoveUser.jsp").forward(request, response);
+    }
+
+    private void removeUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        userDAO.deleteById(id);
+        response.sendRedirect(request.getContextPath() + "/common/home.jsp");
     }
 
     private void registerUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

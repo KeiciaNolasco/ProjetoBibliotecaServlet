@@ -18,7 +18,18 @@
             <a href="${pageContext.request.contextPath}/admin/adminListBooks.jsp">List</a>
         </div>
     </div>
-    <a href="${pageContext.request.contextPath}/logout">Logout</a>
+    <div class="dropdown">
+    <a href="javascript:void(0)" class="dropbtn">Profile</a>
+    <div class="dropdown-content">
+        <c:if test="${not empty sessionScope.user}">
+            <a href="${pageContext.request.contextPath}/admin/adminEditUser.jsp?id=${sessionScope.user.id}&name=${sessionScope.user.name}&email=${sessionScope.user.email}&password=${sessionScope.user.password}">Edit</a>
+        </c:if>
+        <a href="${pageContext.request.contextPath}/logout">Logout</a>
+        <c:if test="${not empty sessionScope.user}">
+            <a href="${pageContext.request.contextPath}/admin/adminRemoveUser.jsp?id=${sessionScope.user.id}&name=${sessionScope.user.name}&email=${sessionScope.user.email}&password=${sessionScope.user.password}">Remove</a>
+        </c:if>
+    </div>
+    </div>
 </nav>
 </body>
 </html>

@@ -430,3 +430,26 @@ form input[type="submit"]:hover {
 .add-book-form input[type="submit"]:hover {
     background-color: #45a049;
 }
+
+.book-details {
+    text-align: center;
+}
+
+.info-container {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 10px 0;
+    color: white;
+}
+
+.book-info .info-row {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.book-info strong {
+    color: #333;
+}
